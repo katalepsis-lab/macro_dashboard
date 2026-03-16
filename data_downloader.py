@@ -76,7 +76,8 @@ def get_boc_data(series_id, series_label, cache_root=local_cache_root):
             data_str = parts[1].strip()
 
             df = pd.read_csv(io.StringIO(data_str))
-            df = df[pd.to_numeric(df[series_id], errors='coerce').notna()]
+            df[series_id] = pd.to_numeric(df[series_id], errors='coerce')
+            df = df[df[series_id].notna()]
             print(f'{series_label} data loaded successfully.')
 
             os.makedirs(cache_root, exist_ok=True)
@@ -135,8 +136,8 @@ def run_all_updates(progress_callback=None):
         CAN_CPI = CAN_CPI[CAN_CPI['DATE']>'1998-12']
 
         # Adding YoY and MoM series
-        CAN_CPI['YoY(%)'] = CAN_CPI['VALUE'].pct_change(12)*100
-        CAN_CPI['MoM(%)'] = CAN_CPI['VALUE'].pct_change(1)*100
+        CAN_CPI['YoY(%)'] = CAN_CPI['VALUE'].pct_change(12, fill_method=None)*100
+        CAN_CPI['MoM(%)'] = CAN_CPI['VALUE'].pct_change(1, fill_method=None)*100
         CAN_CPI = CAN_CPI.drop(['VALUE'], axis=1).dropna()
 
         CAN_CPI.to_csv(f"{local_cache_root}/CAN_CPI.csv")
@@ -153,8 +154,8 @@ def run_all_updates(progress_callback=None):
         US_CPI = US_CPI.reset_index()
         US_CPI['DATE'] = pd.to_datetime(US_CPI['DATE'])
 
-        US_CPI['YoY(%)'] = US_CPI['CPIAUCSL'].pct_change(12)*100
-        US_CPI['MoM(%)'] = US_CPI['CPIAUCSL'].pct_change(1)*100
+        US_CPI['YoY(%)'] = US_CPI['CPIAUCSL'].pct_change(12, fill_method=None)*100
+        US_CPI['MoM(%)'] = US_CPI['CPIAUCSL'].pct_change(1, fill_method=None)*100
 
         US_CPI = US_CPI.drop('CPIAUCSL', axis=1).dropna()
 
@@ -181,8 +182,8 @@ def run_all_updates(progress_callback=None):
         CAN_PPI = CAN_PPI[CAN_PPI['DATE']>'1998-12']
 
         # Adding YoY and MoM series
-        CAN_PPI['YoY(%)'] = CAN_PPI['VALUE'].pct_change(12)*100
-        CAN_PPI['MoM(%)'] = CAN_PPI['VALUE'].pct_change(1)*100
+        CAN_PPI['YoY(%)'] = CAN_PPI['VALUE'].pct_change(12, fill_method=None)*100
+        CAN_PPI['MoM(%)'] = CAN_PPI['VALUE'].pct_change(1, fill_method=None)*100
         CAN_PPI = CAN_PPI.drop(['VALUE'], axis=1).dropna()
 
         CAN_PPI.to_csv(f"{local_cache_root}/CAN_PPI.csv")
@@ -199,8 +200,8 @@ def run_all_updates(progress_callback=None):
         US_PPI = US_PPI.reset_index()
         US_PPI['DATE'] = pd.to_datetime(US_PPI['DATE'])
 
-        US_PPI['YoY(%)'] = US_PPI['PPIACO'].pct_change(12)*100
-        US_PPI['MoM(%)'] = US_PPI['PPIACO'].pct_change(1)*100
+        US_PPI['YoY(%)'] = US_PPI['PPIACO'].pct_change(12, fill_method=None)*100
+        US_PPI['MoM(%)'] = US_PPI['PPIACO'].pct_change(1, fill_method=None)*100
 
         US_PPI = US_PPI.drop('PPIACO', axis=1).dropna()
 
@@ -336,8 +337,8 @@ def run_all_updates(progress_callback=None):
         CAN_rGDP = subset_GDP[['REF_DATE','VALUE']].copy()
 
         CAN_rGDP = CAN_rGDP.rename({'REF_DATE':'DATE','VALUE':'rGDP'}, axis=1)
-        CAN_rGDP['YoY(%)'] = CAN_rGDP['rGDP'].pct_change(12)*100
-        CAN_rGDP['MoM(%)_annualized'] = ((CAN_rGDP['rGDP'].pct_change() + 1)**12 - 1)*100   # Monthly data
+        CAN_rGDP['YoY(%)'] = CAN_rGDP['rGDP'].pct_change(12, fill_method=None)*100
+        CAN_rGDP['MoM(%)_annualized'] = ((CAN_rGDP['rGDP'].pct_change(fill_method=None) + 1)**12 - 1)*100   # Monthly data
         CAN_rGDP = CAN_rGDP.dropna()
 
         CAN_rGDP.to_csv(f'{local_cache_root}/CAN_rGDP.csv')
@@ -357,8 +358,8 @@ def run_all_updates(progress_callback=None):
         CAN_rGDP_EXP = subset_GDP_EXP[['REF_DATE', 'VALUE']].copy()
         CAN_rGDP_EXP = CAN_rGDP_EXP.rename({'REF_DATE': 'DATE', 'VALUE': 'rGDP'}, axis=1)
         CAN_rGDP_EXP['DATE'] = pd.to_datetime(CAN_rGDP_EXP['DATE'])
-        CAN_rGDP_EXP['YoY(%)'] = CAN_rGDP_EXP['rGDP'].pct_change(4) * 100
-        CAN_rGDP_EXP['QoQ(%)_annualized'] = ((CAN_rGDP_EXP['rGDP'].pct_change() + 1)**4 - 1) * 100   # Quarterly data
+        CAN_rGDP_EXP['YoY(%)'] = CAN_rGDP_EXP['rGDP'].pct_change(4, fill_method=None) * 100
+        CAN_rGDP_EXP['QoQ(%)_annualized'] = ((CAN_rGDP_EXP['rGDP'].pct_change(fill_method=None) + 1)**4 - 1) * 100   # Quarterly data
         CAN_rGDP_EXP = CAN_rGDP_EXP.dropna()
 
         CAN_rGDP_EXP.to_csv(f'{local_cache_root}/CAN_rGDP_EXP.csv')
@@ -375,8 +376,8 @@ def run_all_updates(progress_callback=None):
         US_GDP = US_GDP.reset_index()
         US_GDP = US_GDP.rename({'GDPC1':'rGDP'}, axis=1)
 
-        US_GDP['YoY(%)'] = US_GDP['rGDP'].pct_change(4)*100
-        US_GDP['MoM(%)_annualized'] = ((US_GDP['rGDP'].pct_change() + 1)**4 - 1)*100 # Quarterly data
+        US_GDP['YoY(%)'] = US_GDP['rGDP'].pct_change(4, fill_method=None)*100
+        US_GDP['MoM(%)_annualized'] = ((US_GDP['rGDP'].pct_change(fill_method=None) + 1)**4 - 1)*100 # Quarterly data
 
         US_GDP = US_GDP.dropna()
         US_GDP.to_csv(f'{local_cache_root}/US_rGDP.csv')
@@ -510,7 +511,7 @@ def run_all_updates(progress_callback=None):
         US_CB_BS['CB_assets(B)'] = US_CB_BS['WALCL']/1000 # Convert Millions to Billions
         US_CB_BS = US_CB_BS.reset_index()
         US_CB_BS['DATE'] = pd.to_datetime(US_CB_BS['DATE'])
-        US_CB_BS['Weekly_Change(%)'] = US_CB_BS['CB_assets(B)'].pct_change() * 100
+        US_CB_BS['Weekly_Change(%)'] = US_CB_BS['CB_assets(B)'].pct_change(fill_method=None) * 100
 
         # Note: FRED 'WALCL' is weekly, so 13 weeks ~= 3 months
         US_CB_BS['3M_Rolling_Avg_Change(%)'] = US_CB_BS['Weekly_Change(%)'].rolling(window=13).mean()
@@ -532,7 +533,7 @@ def run_all_updates(progress_callback=None):
         df_boc = df_boc.rename(columns={'date':'DATE'})
         df_boc['DATE'] = pd.to_datetime(df_boc['DATE'])
 
-        df_boc['Weekly_Change_%'] = df_boc['CB_assets_B'].pct_change() * 100
+        df_boc['Weekly_Change_%'] = df_boc['CB_assets_B'].pct_change(fill_method=None) * 100
 
         #3Mo rolling average % change
         df_boc['3M_Rolling_Avg_Change_%'] = df_boc['Weekly_Change_%'].rolling(window=13).mean()
