@@ -76,6 +76,7 @@ def get_boc_data(series_id, series_label, cache_root=local_cache_root):
             data_str = parts[1].strip()
 
             df = pd.read_csv(io.StringIO(data_str))
+            df = df[pd.to_numeric(df[series_id], errors='coerce').notna()]
             print(f'{series_label} data loaded successfully.')
 
             os.makedirs(cache_root, exist_ok=True)
