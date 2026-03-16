@@ -1,0 +1,5 @@
+streamlit==1.45.1
+pandas==2.3.3
+plotly==5.9.0
+requests==2.31.0
+pandas-datareader==0.10.0
