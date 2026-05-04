@@ -245,16 +245,23 @@ def get_processed_data() -> dict[str, pd.DataFrame]:
         can_df = can_df[can_df.index >= START_DATE]
 
     if not can_df.empty:
+        _cc = can_df.columns
         # 1. Debt / Revenues
-        can_df["Debt / Fed Govt Revenues"]     = can_df["CAN Govt Debt(B)"] / can_df["CAN_REV_TTM"]
+        if "CAN Govt Debt(B)" in _cc and "CAN_REV_TTM" in _cc:
+            can_df["Debt / Fed Govt Revenues"]     = can_df["CAN Govt Debt(B)"] / can_df["CAN_REV_TTM"]
         # 2. Deficit / Revenues  (negative = deficit)
-        can_df["Deficit / Fed Govt Revenues"]  = can_df["CAN_FISC_TTM"]     / can_df["CAN_REV_TTM"]
+        if "CAN_FISC_TTM" in _cc and "CAN_REV_TTM" in _cc:
+            can_df["Deficit / Fed Govt Revenues"]  = can_df["CAN_FISC_TTM"]     / can_df["CAN_REV_TTM"]
         # 3. Interest / Revenues  (TTM for both)
-        can_df["Interest / Fed Govt Revenues"] = can_df["CAN_INT_TTM"]      / can_df["CAN_REV_TTM"]
+        if "CAN_INT_TTM" in _cc and "CAN_REV_TTM" in _cc:
+            can_df["Interest / Fed Govt Revenues"] = can_df["CAN_INT_TTM"]      / can_df["CAN_REV_TTM"]
         # 4 & 5. Real yields, spread, ratio
-        can_df["CAN_ST_Real"] = can_df["CAN_1Y_TBILL_yield"] - can_df["INF_EXP_1Y(%)"]
-        can_df["CAN_LT_Real"] = can_df["CAN_10Y_TBILL"]      - can_df["10Y_BE_INF"]
-        can_df["L-T real yield - S-T real yield"] = can_df["CAN_LT_Real"] - can_df["CAN_ST_Real"]
+        if "CAN_1Y_TBILL_yield" in _cc and "INF_EXP_1Y(%)" in _cc:
+            can_df["CAN_ST_Real"] = can_df["CAN_1Y_TBILL_yield"] - can_df["INF_EXP_1Y(%)"]
+        if "CAN_10Y_TBILL" in _cc and "10Y_BE_INF" in _cc:
+            can_df["CAN_LT_Real"] = can_df["CAN_10Y_TBILL"]      - can_df["10Y_BE_INF"]
+        if "CAN_LT_Real" in can_df.columns and "CAN_ST_Real" in can_df.columns:
+            can_df["L-T real yield - S-T real yield"] = can_df["CAN_LT_Real"] - can_df["CAN_ST_Real"]
         # 6–9: CAN_rGDP_YoY, CAN_CA_TTM, CAN_FLOWS_ZSCORE, 3M_Rolling_Avg_Change_% are ready
 
     # ── United States ─────────────────────────────────────────────────────────
@@ -282,15 +289,23 @@ def get_processed_data() -> dict[str, pd.DataFrame]:
         us_df = us_df[us_df.index >= START_DATE]
 
     if not us_df.empty:
-        us_df["Debt / Fed Govt Revenues"]     = us_df["US Govt Debt(B)"] / us_df["US_REV_TTM"]
-        us_df["Deficit / Fed Govt Revenues"]  = us_df["US_FISC_TTM"]     / us_df["US_REV_TTM"]
+        _uc = us_df.columns
+        if "US Govt Debt(B)" in _uc and "US_REV_TTM" in _uc:
+            us_df["Debt / Fed Govt Revenues"]     = us_df["US Govt Debt(B)"] / us_df["US_REV_TTM"]
+        if "US_FISC_TTM" in _uc and "US_REV_TTM" in _uc:
+            us_df["Deficit / Fed Govt Revenues"]  = us_df["US_FISC_TTM"]     / us_df["US_REV_TTM"]
         # A091RC1Q027SBEA is SAAR (annual rate); divide by 4 to get actual
         # quarterly payments before summing to a 4-quarter TTM.
-        us_df["US_INT_TTM"] = (us_df["Interest_Payments_B"] / 4).rolling(window=4, min_periods=4).sum()
-        us_df["Interest / Fed Govt Revenues"] = us_df["US_INT_TTM"] / us_df["US_REV_TTM"]
-        us_df["US_ST_Real"] = us_df["US_1Y_TBILL"] - us_df["EXPINF1YR"]
-        us_df["US_LT_Real"] = us_df["US_10Y_TBILL"] - us_df["EXPINF10YR"]
-        us_df["L-T real yield - S-T real yield"] = us_df["US_LT_Real"] - us_df["US_ST_Real"]
+        if "Interest_Payments_B" in _uc:
+            us_df["US_INT_TTM"] = (us_df["Interest_Payments_B"] / 4).rolling(window=4, min_periods=4).sum()
+        if "US_INT_TTM" in us_df.columns and "US_REV_TTM" in _uc:
+            us_df["Interest / Fed Govt Revenues"] = us_df["US_INT_TTM"] / us_df["US_REV_TTM"]
+        if "US_1Y_TBILL" in _uc and "EXPINF1YR" in _uc:
+            us_df["US_ST_Real"] = us_df["US_1Y_TBILL"] - us_df["EXPINF1YR"]
+        if "US_10Y_TBILL" in _uc and "EXPINF10YR" in _uc:
+            us_df["US_LT_Real"] = us_df["US_10Y_TBILL"] - us_df["EXPINF10YR"]
+        if "US_LT_Real" in us_df.columns and "US_ST_Real" in us_df.columns:
+            us_df["L-T real yield - S-T real yield"] = us_df["US_LT_Real"] - us_df["US_ST_Real"]
 
     # ── High-frequency raw series ──────────────────────────────────────────────
     # Weekly real yield spread — CAN
