@@ -315,7 +315,8 @@ def get_processed_data() -> dict[str, pd.DataFrame]:
         _to_weekly(_read("CAN_10Y_INF.csv"),   ["10Y_BE_INF"],         "last"),
         _to_weekly(_read("CAN_1Y_INF.csv"),    ["INF_EXP_1Y(%)"],      "ffill"),
     ])
-    if not _can_sp_w.empty:
+    _can_spread_cols = {"CAN_10Y_TBILL", "10Y_BE_INF", "CAN_1Y_TBILL_yield", "INF_EXP_1Y(%)"}
+    if not _can_sp_w.empty and _can_spread_cols.issubset(_can_sp_w.columns):
         _can_sp_w["yield_spread"] = (
             (_can_sp_w["CAN_10Y_TBILL"] - _can_sp_w["10Y_BE_INF"]) -
             (_can_sp_w["CAN_1Y_TBILL_yield"] - _can_sp_w["INF_EXP_1Y(%)"])
@@ -329,7 +330,8 @@ def get_processed_data() -> dict[str, pd.DataFrame]:
         _to_weekly(_read("US_10Y_INF.csv"),   ["EXPINF10YR"],   "last"),
         _to_weekly(_read("US_1Y_INF.csv"),    ["EXPINF1YR"],    "last"),
     ])
-    if not _us_sp_w.empty:
+    _us_spread_cols = {"US_1Y_TBILL", "US_10Y_TBILL", "EXPINF10YR", "EXPINF1YR"}
+    if not _us_sp_w.empty and _us_spread_cols.issubset(_us_sp_w.columns):
         _us_sp_w["yield_spread"] = (
             (_us_sp_w["US_10Y_TBILL"] - _us_sp_w["EXPINF10YR"]) -
             (_us_sp_w["US_1Y_TBILL"] - _us_sp_w["EXPINF1YR"])

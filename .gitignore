@@ -1,5 +1,6 @@
 source_data/
 __pycache__/
 .claude/
+CLAUDE.md
 *.ipynb
 BoC_series_ID.csv
